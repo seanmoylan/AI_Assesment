@@ -30,9 +30,9 @@ import java.util.stream.Collectors;
 
 
 public class NodeParser {
-	private final int MAX = 100;
-	private final int TITLE_WEIGHT = 50;
-	private final int HEADING1_WEIGHT = 20;
+	private final int MAX = 20;
+	private final int TITLE_WEIGHT = 80;
+	private final int HEADING1_WEIGHT = 30;
 	private final int PARAGRAPH_WEIGHT = 1;
 	private Map<String, Integer> wordMap = new TreeMap<>();
 	private Map<String, Integer> sortedByCount;
@@ -44,7 +44,7 @@ public class NodeParser {
 	
 	public NodeParser(String url, String term) throws Exception {
 		this.term = term;
-		Document doc = Jsoup.connect(url ).get();
+		Document doc = Jsoup.connect(url + term).get();
 		int score = getHeuristicScore(doc);
 		
 		// Add first URL to the closed Set
@@ -96,7 +96,7 @@ public class NodeParser {
 
 	private int getHeuristicScore(Document doc) {
 		// Initialize scores
-		int fuzzyScore = 0;
+		double fuzzyScore = 0;
 		int titleScore = 0;
 		int headingScore = 0;
 		int bodyScore = 0;
@@ -118,7 +118,7 @@ public class NodeParser {
 		String body = doc.body().text();
 		bodyScore  = getFrequency(body) * PARAGRAPH_WEIGHT;
 
-		//fuzzyScore = getFuzzyHeuristics(titleScore, headingScore, bodyScore);
+		fuzzyScore = getFuzzyHeuristics(titleScore, headingScore, bodyScore);
 
 
 		index(title, headings.text(), body);
@@ -126,9 +126,11 @@ public class NodeParser {
 
 
 		// Display the score that will be passed into wordcloud.fcl
-		System.out.println("Fuzzy ints to process: " + titleScore);
+		System.out.println("Fuzzy title to process: " + titleScore);
 		System.out.println("Fuzzy heading to process: " + headingScore);
 		System.out.println("Fuzzy body to process: " + bodyScore);
+
+		System.out.println("Fuzzy score: " + fuzzyScore);
 
 		return 0;
 	}
@@ -166,10 +168,10 @@ public class NodeParser {
 		}
 	}
 
-	private int getFuzzyHeuristics(int titles, int headings, int body){
-		/*
+	private double getFuzzyHeuristics(int titles, int headings, int body){
+
 		FIS fis = FIS.load("./conf/wordcloud.fcl", true);
-		FunctionBlock functionBlock = fis.getFunctionBlock("tipper");
+		FunctionBlock functionBlock = fis.getFunctionBlock("wordcloud");
 
 		// Set Variables
 		fis.setVariable("title", titles);
@@ -182,19 +184,16 @@ public class NodeParser {
 		// Get output variables
 		Variable score = functionBlock.getVariable("score");
 
-		/*
-		* if(fuzzy score is high)
-		* 	call index on the title, headings and body
-		*
-		*
-		*
-		 */
-		return 0;
+
+		//if(fuzzy score is high)
+		//	call index on the title, headings and body
+
+		return score.getValue();
 	}
 
 
 	public static void main(String[] args) throws Exception {
-		new NodeParser("https://codereview.stackexchange.com/", "trump");
+		new NodeParser("https://duckduckgo.com/html/?q=", "trump");
 
 
 	}
