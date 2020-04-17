@@ -2,10 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8fa9548c-3482-475f-a5c3-572fd2709220" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ie/gmit/sw/ai/cloud/CollisionDetector.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ie/gmit/sw/ai/cloud/LogarithmicSpiralPlacer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ie/gmit/sw/ai/cloud/WeightedFont.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ie/gmit/sw/ai/cloud/WordFrequency.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ie/gmit/sw/ignorewords.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conf/wordcloud.fcl" beforeDir="false" afterPath="$PROJECT_DIR$/conf/wordcloud.fcl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ie/gmit/sw/NodeParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ie/gmit/sw/NodeParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ie/gmit/sw/WordFrequency.java" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -28,7 +32,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/ie/gmit/sw" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -43,6 +47,8 @@
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/ie/gmit/sw" />
+      <recent name="$PROJECT_DIR$/src/ie/gmit/sw/ai/cloud/cloud" />
+      <recent name="$PROJECT_DIR$/src/ie/gmit/sw/ai/cloud" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/ie/gmit/sw" />
@@ -107,7 +113,9 @@
       <workItem from="1585851086459" duration="81000" />
       <workItem from="1586870354295" duration="20493000" />
       <workItem from="1587055015507" duration="2036000" />
-      <workItem from="1587059041349" duration="1818000" />
+      <workItem from="1587059041349" duration="3678000" />
+      <workItem from="1587125166738" duration="10314000" />
+      <workItem from="1587148608474" duration="109000" />
     </task>
     <servers />
   </component>

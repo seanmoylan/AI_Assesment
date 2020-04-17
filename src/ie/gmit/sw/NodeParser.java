@@ -11,12 +11,18 @@
 
 package ie.gmit.sw;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import ie.gmit.sw.ai.cloud.WordFrequency;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import net.sourceforge.jFuzzyLogic.rule.Variable;
@@ -35,8 +41,11 @@ public class NodeParser {
 	private final int HEADING1_WEIGHT = 30;
 	private final int PARAGRAPH_WEIGHT = 1;
 	private Map<String, Integer> wordMap = new TreeMap<>();
+	private WordFrequency[] words;
 	private Map<String, Integer> sortedByCount;
 	private String term;
+
+	private List<String> ignoreWords;
 	
 	// A set used for checking if a given url has already been visited
 	private Set<String> closed = new ConcurrentSkipListSet<>();
@@ -46,7 +55,8 @@ public class NodeParser {
 		this.term = term;
 		Document doc = Jsoup.connect(url + term).get();
 		int score = getHeuristicScore(doc);
-		
+
+		loadIgnoreWords();
 		// Add first URL to the closed Set
 		closed.add(url);
 		
@@ -54,20 +64,18 @@ public class NodeParser {
 		queue.offer(new DocumentNode(doc, score));		
 		
 		// Process
-		process();
+		search();
 
 		// Print map to console
 		sortedByCount = sortByValue(wordMap);
-		sortedByCount.entrySet().forEach(entry->{
-			if(entry.getValue() > 20) {
-				System.out.println(entry.getKey() + " " + entry.getValue());
-			}
-		});
+
+		WordFrequency[] words = new WordFrequency[20];
+		words = getWordFrequencyKeyValue(20);
 
 
 	}
 	
-	private void process() {
+	private void search() {
 		while(!queue.isEmpty() && closed.size() <= MAX) {
 			DocumentNode node = queue.poll();
 			Document doc = node.getDocument();
@@ -96,6 +104,7 @@ public class NodeParser {
 
 	private int getHeuristicScore(Document doc) {
 		// Initialize scores
+		int heuristicScore = 0;
 		double fuzzyScore = 0;
 		int titleScore = 0;
 		int headingScore = 0;
@@ -121,8 +130,12 @@ public class NodeParser {
 		fuzzyScore = getFuzzyHeuristics(titleScore, headingScore, bodyScore);
 
 
-		index(title, headings.text(), body);
-		int temp = titleScore + headingScore + bodyScore;
+		if(fuzzyScore > 20.0)
+		{
+			index(title, headings.text(), body);
+		}
+
+		heuristicScore = titleScore + headingScore + bodyScore;
 
 
 		// Display the score that will be passed into wordcloud.fcl
@@ -132,26 +145,38 @@ public class NodeParser {
 
 		System.out.println("Fuzzy score: " + fuzzyScore);
 
-		return 0;
+		return heuristicScore;
 	}
 
 	private int getFrequency(String s){
 		int count = 0;
 		String[] wordArray = parseString(s);
-		for (String word : wordArray){
-			if(word.equalsIgnoreCase(term))
-				count++;
+		try {
+			for (String word : wordArray) {
+				if (word.equalsIgnoreCase(term))
+					count++;
+			}
+			System.out.println("Frequency Count: " + count);
+			return count;
+		}catch (Exception e){
+			return 0;
 		}
-		System.out.println("Frequency Count: " + count);
-		return count;
+
 	}
 
 	private String[] parseString(String... string){
 		String fullString = String.join(" ", string);
-		String delims = "[ ©–—”•↑★#1234567890,.\"\'-/:$%&();?!| ]+";
-		String[] wordArray = fullString.split(delims);
+		String delims = "[ ©–—”•↑★#,.\"\'/:$%&();?!| ]+";
 
-		return wordArray;
+
+		for (char c : fullString.toCharArray()) {
+			if (!(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z')) {
+				String[] wordArray = fullString.split(delims);
+				return wordArray;
+			}
+		}
+		return null;
+
 	}
 
 	private void index(String... text){
@@ -160,11 +185,20 @@ public class NodeParser {
 		String[] wordArray = parseString(text);
 
 		for (String word : wordArray) {
-			// Extract each word from the string and add to map after filtering with ignore words
+			try{
+				// Extract each word from the string and add to map after filtering with ignore words
+				if(!ignoreWords.contains(word) && word.length() > 4){
+					Integer n = wordMap.get(word);
+					n = (n == null) ? 1 : ++n;
+					wordMap.put(word, n);
 
-			Integer n = wordMap.get(word);
-			n = (n == null) ? 1 : ++n;
-			wordMap.put(word, n);
+				}
+			}
+			catch (Exception ex){
+
+			}
+
+
 		}
 	}
 
@@ -184,34 +218,34 @@ public class NodeParser {
 		// Get output variables
 		Variable score = functionBlock.getVariable("score");
 
-
-		//if(fuzzy score is high)
-		//	call index on the title, headings and body
-
 		return score.getValue();
 	}
 
 
 	public static void main(String[] args) throws Exception {
-		new NodeParser("https://duckduckgo.com/html/?q=", "trump");
+		new NodeParser("https://duckduckgo.com/html/?q=", "donald");
 
 
 	}
 
 
-	public WordFrequency[] getWordFrequencyKeyValue() {
-		// Convert Map to WordFrequency array
+	public WordFrequency[] getWordFrequencyKeyValue(int numberOfWords) {
 
+		words = new WordFrequency[numberOfWords+1];
+		int i = 1;
+		for(Map.Entry<String, Integer> entry: sortedByCount.entrySet()){
+			System.out.println("Word: " + entry.getKey() + " ---> Count: " + entry.getValue());
+			words[i] = new WordFrequency(entry.getKey(),entry.getValue());
 
-
-		WordFrequency[] words = new WordFrequency[4];
-
-
-
+			if(i == numberOfWords){
+				return words;
+			}
+			i++;
+		}
 		return words;
 	}
 
-	public static Map<String, Integer> sortByValue(final Map<String, Integer> wordCounts) {
+	private static Map<String, Integer> sortByValue(final Map<String, Integer> wordCounts) {
 
 		return wordCounts.entrySet()
 
@@ -221,6 +255,15 @@ public class NodeParser {
 
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
+	}
+
+	private void loadIgnoreWords() throws FileNotFoundException {
+		Scanner s = new Scanner(new File("/Users/seanmoylan/Desktop/AI_Assesment/src/ie/gmit/sw/ignorewords.txt"));
+		ignoreWords = new ArrayList<>();
+		while (s.hasNext()){
+			ignoreWords.add(s.next());
+		}
+		s.close();
 	}
 
 
